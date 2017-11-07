@@ -209,7 +209,7 @@ def read_credentials()
   puts "*************************************************"
   puts ""
   puts "Enter filename"
-  #@filename = gets
+  @filename = gets
 
   @access_code1 = get_password("Enter your access code 1 ")
   @access_code2 = get_password("Enter your access code 2 ")
