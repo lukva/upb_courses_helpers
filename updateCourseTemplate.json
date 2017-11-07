@@ -1,0 +1,24 @@
+{
+  "code": "_COURSE_CODE_",
+  "name": "_COURSE_NAME_",
+  "title": {
+    "cs": _TITLE_CS_,
+    "en": _TITLE_EN_
+  },
+  "desc": "_DESC_",
+  "intro": "_INTRO_",
+  "state": "_STATE_",
+  "languages": _LANGUAGE_,
+  "blockList": _BLOCK_LIST_,
+  "knowledgeExpiration": _EXPIRATION_,
+  "shortcut": _SHORTCUT_,
+  "prerequisiteTest": _PREREQUISITE_TEST_,
+  "scanTest": _SCAN_TEST_,
+  "activityQuestionNumber": _QUESTION_NUMBER_,
+  "activityMaxDuration": _MAX_DURATION_,
+  "activityMinScoreToPass": _MIN_SCORE_TO_PASS_,
+  "activityMinScoreToFullStar": _MIN_SCORE_TO_FULL_STAR_,
+  "activityMaxStars": _MAX_STARS_,
+  "courseMenuSize": "_COURSE_MENU_SIZE_",
+  "topicMenuSize": "_TOPIC_MENU_SIZE_"
+}
