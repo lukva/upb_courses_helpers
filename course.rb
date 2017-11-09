@@ -1,16 +1,17 @@
 require 'spreadsheet'
 require 'json'
 require 'net/http'
+require 'openssl'
 require 'uri'
 require 'rubygems'
 require 'highline/import'
 
-@filename = 'EHT_v5.xls'
+@filename = ''
 TEMPLATE_UPDATE_COURSE = 'updateCourseTemplate.json'
 
 GATEWAY = "https://uuos9.plus4u.net"
 
-@book = Spreadsheet.open("./#{@filename}")
+@book = nil
 @template = File.open("./#{TEMPLATE_UPDATE_COURSE}", "r").read
 
 @access_code1 = ""
@@ -138,6 +139,7 @@ end
 def post_request(uri, header, body)
   https = Net::HTTP.new(uri.host, uri.port)
   https.use_ssl = true
+  https.verify_mode = OpenSSL::SSL::VERIFY_NONE
 
   request = Net::HTTP::Post.new(uri.request_uri, header)
   request.body = body
@@ -202,6 +204,7 @@ def process_content
   max_stars = 0
   course_menu_size = "big"
   topic_menu_size = "big"
+  logo = ""
 
   sheet.each_with_index do |row, index|
     index == 0 && (course_code = row[0])
@@ -227,6 +230,7 @@ def process_content
     index == 17 && (max_stars = row[1])
     index == 18 && (course_menu_size = row[1])
     index == 19 && (topic_menu_size = row[1])
+    index == 24 && (logo = row[1])
   end
 
   @template["_COURSE_CODE_"] = course_code
@@ -249,6 +253,9 @@ def process_content
   @template["_BLOCK_LIST_"] = process_block_list(course_code)
   @template["_COURSE_MENU_SIZE_"] = course_menu_size
   @template["_TOPIC_MENU_SIZE_"] = topic_menu_size
+  @template["_LOGO_"] = logo
+
+  puts @template
 
   @template
 end
@@ -264,6 +271,7 @@ def grant_token
 
   https = Net::HTTP.new(uri.host, uri.port)
   https.use_ssl = true
+  https.verify_mode = OpenSSL::SSL::VERIFY_NONE
 
   request = Net::HTTP::Post.new(uri.request_uri, header)
   request.body = body.to_json
@@ -285,6 +293,7 @@ def update_course(body)
 
   https = Net::HTTP.new(uri.host, uri.port)
   https.use_ssl = true
+  https.verify_mode = OpenSSL::SSL::VERIFY_NONE
 
   request = Net::HTTP::Post.new(uri.request_uri, header)
   request.body = body
@@ -298,8 +307,8 @@ def update_course(body)
 
 end
 
-def get_password(prompt='PasswMord: ')
-  ask(prompt) { |q| q.echo = false}
+def get_password(prompt='Password: ')
+  ask(prompt) { |q| q.echo = "*"}
 end
 
 def read_credentials()
@@ -307,10 +316,12 @@ def read_credentials()
   puts "*************************************************"
   puts ""
   puts "Enter filename"
-  @filename = gets
+  @filename = gets.strip
 
   @access_code1 = get_password("Enter your access code 1 ")
   @access_code2 = get_password("Enter your access code 2 ")
+
+  @book = Spreadsheet.open("#{File.expand_path(File.dirname(__FILE__))}/#{@filename}")
 end
 
 read_credentials

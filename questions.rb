@@ -1,11 +1,12 @@
 require 'spreadsheet'
 require 'json'
 require 'net/http'
+require 'openssl'
 require 'uri'
 require 'rubygems'
 require 'highline/import'
 
-@filename = 'EHT_v5.xls'
+@filename = ''
 
 GATEWAY = "https://uuos9.plus4u.net"
 
@@ -15,7 +16,7 @@ GATEWAY = "https://uuos9.plus4u.net"
 @tid = ""
 @awid = ""
 
-@book = Spreadsheet.open("./#{@filename}")
+@book = nil
 
 def get_lsi_items(cz, en)
   lsi_cz = ""
@@ -116,6 +117,7 @@ end
 def post_request(uri, header, body)
   https = Net::HTTP.new(uri.host, uri.port)
   https.use_ssl = true
+  https.verify_mode = OpenSSL::SSL::VERIFY_NONE
 
   request = Net::HTTP::Post.new(uri.request_uri, header)
   request.body = body
@@ -133,7 +135,6 @@ def upload_question(question)
   uri = URI.parse("#{GATEWAY}/uu-coursekitg01-course/#{@tid}-#{@awid}/#{add}")
 
   response = post_request(uri, header, question)
-  puts question
 
   if JSON.parse(response.body)["uuAppErrorMap"]["uu-coursekit-course/addQuestion/questionDaoCreateFailed"]
     uri = URI.parse("#{GATEWAY}/uu-coursekitg01-course/#{@tid}-#{@awid}/#{update}")
@@ -175,6 +176,7 @@ def grant_token
 
   https = Net::HTTP.new(uri.host, uri.port)
   https.use_ssl = true
+  https.verify_mode = OpenSSL::SSL::VERIFY_NONE
 
   request = Net::HTTP::Post.new(uri.request_uri, header)
   request.body = body.to_json
@@ -190,7 +192,7 @@ def grant_token
 end
 
 def get_password(prompt='Password: ')
-  ask(prompt) { |q| q.echo = false}
+  ask(prompt) { |q| q.echo = "*"}
 end
 
 def read_awid
@@ -209,10 +211,12 @@ def read_credentials()
   puts "*************************************************"
   puts ""
   puts "Enter filename"
-  @filename = gets
+  @filename = gets.strip
 
   @access_code1 = get_password("Enter your access code 1 ")
   @access_code2 = get_password("Enter your access code 2 ")
+
+  @book = Spreadsheet.open("./#{@filename}")
 end
 
 read_credentials

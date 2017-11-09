@@ -1,16 +1,16 @@
 require 'spreadsheet'
 require 'json'
 require 'net/http'
+require 'openssl'
 require 'uri'
 require 'uu_os'
 require 'fileutils'
 require 'highline/import'
 
-@filename = 'EHT_v5.xls'
-
+@filename = ''
 GATEWAY = "https://uuos9.plus4u.net"
 
-@book = Spreadsheet.open("./#{@filename}")
+@book = nil
 
 @access_code1 = ""
 @access_code2 = ""
@@ -20,8 +20,8 @@ GATEWAY = "https://uuos9.plus4u.net"
 @student = ""
 @test_student = ""
 
-def get_password(prompt='PasswMord: ')
-  ask(prompt) { |q| q.echo = false}
+def get_password(prompt='Password: ')
+  ask(prompt) { |q| q.echo = "*"}
 end
 
 def read_credentials()
@@ -29,15 +29,17 @@ def read_credentials()
   puts "*************************************************"
   puts ""
   puts "Enter filename"
-  @filename = gets
+  @filename = gets.strip
 
   @access_code1 = get_password("Enter your access code 1 ")
   @access_code2 = get_password("Enter your access code 2 ")
 
-  access_file = File.new("access", "w")
+  access_file = File.new("./access", "w")
   access_file.puts ("accessCode1=#{@access_code1}")
   access_file.puts ("accessCode2=#{@access_code2}")
   access_file.close
+
+  @book = Spreadsheet.open("./#{@filename}")
 end
 
 def read_awid
@@ -51,7 +53,7 @@ def read_awid
 end
 
 def delete_access
-  File.exists?("access") && File.delete("access")
+  File.exists?("access") && File.delete("#{File.dirname(__FILE__)}/access")
 end
 
 def read_user_groups
@@ -65,7 +67,7 @@ def read_user_groups
 end
 
 def process_user_group(uri)
-  UU::OS::Security::Session.login("#{File.dirname(__FILE__)}/access")
+  UU::OS::Security::Session.login("#{File.expand_path(File.dirname(__FILE__))}/access")
 
   role_cast_list = UU::OS::Cast.get_access_role_cast_list(uri)
 
@@ -91,6 +93,7 @@ end
 def post_request(uri, header, body)
   https = Net::HTTP.new(uri.host, uri.port)
   https.use_ssl = true
+  https.verify_mode = OpenSSL::SSL::VERIFY_NONE
 
   request = Net::HTTP::Post.new(uri.request_uri, header)
   request.body = body
@@ -109,6 +112,7 @@ def grant_token
 
   https = Net::HTTP.new(uri.host, uri.port)
   https.use_ssl = true
+  https.verify_mode = OpenSSL::SSL::VERIFY_NONE
 
   request = Net::HTTP::Post.new(uri.request_uri, header)
   request.body = body.to_json

@@ -20,5 +20,6 @@
   "activityMinScoreToFullStar": _MIN_SCORE_TO_FULL_STAR_,
   "activityMaxStars": _MAX_STARS_,
   "courseMenuSize": "_COURSE_MENU_SIZE_",
-  "topicMenuSize": "_TOPIC_MENU_SIZE_"
+  "topicMenuSize": "_TOPIC_MENU_SIZE_",
+  "logo": "_LOGO_"
 }
