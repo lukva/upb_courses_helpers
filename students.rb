@@ -7,7 +7,7 @@ require 'uu_os'
 require 'fileutils'
 require 'highline/import'
 
-@filename = ''
+@filename = "Makroekonomie_v16.xls"
 GATEWAY = "https://uuos9.plus4u.net"
 
 @book = nil
@@ -75,6 +75,7 @@ def process_user_group(uri)
     role_cast_list.each do |item|
       student = Hash.new
       uuid = item.casted_subject_code
+      puts "Start to process #{uuid}"
       ar = UU::OS::PersonalAccessRole.get_attributes("ues:UCL-BT:#{uuid}")
       student["uuIdentity"] = uuid
       student["firstName"] = ar.first_name
@@ -94,6 +95,7 @@ def post_request(uri, header, body)
   https = Net::HTTP.new(uri.host, uri.port)
   https.use_ssl = true
   https.verify_mode = OpenSSL::SSL::VERIFY_NONE
+  OpenSSL::SSL::SSLContext::DEFAULT_PARAMS[:ssl_version] = "TLSv1_2"
 
   request = Net::HTTP::Post.new(uri.request_uri, header)
   request.body = body
@@ -113,6 +115,7 @@ def grant_token
   https = Net::HTTP.new(uri.host, uri.port)
   https.use_ssl = true
   https.verify_mode = OpenSSL::SSL::VERIFY_NONE
+  OpenSSL::SSL::SSLContext::DEFAULT_PARAMS[:ssl_version] = "TLSv1_2"
 
   request = Net::HTTP::Post.new(uri.request_uri, header)
   request.body = body.to_json
@@ -140,7 +143,7 @@ def add_student(student)
     if JSON.parse(response.body)["uuAppErrorMap"]["uu-coursekit-course/addStudent/studentDaoCreateFailed"]
       puts "Existing user"
     else
-      puts "Something went wrong", response.body, question
+      puts "Something went wrong", response.body, student
       raise "Something went wrong"
     end
   end

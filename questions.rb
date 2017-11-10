@@ -118,6 +118,7 @@ def post_request(uri, header, body)
   https = Net::HTTP.new(uri.host, uri.port)
   https.use_ssl = true
   https.verify_mode = OpenSSL::SSL::VERIFY_NONE
+  OpenSSL::SSL::SSLContext::DEFAULT_PARAMS[:ssl_version] = "TLSv1_2"
 
   request = Net::HTTP::Post.new(uri.request_uri, header)
   request.body = body
@@ -177,6 +178,7 @@ def grant_token
   https = Net::HTTP.new(uri.host, uri.port)
   https.use_ssl = true
   https.verify_mode = OpenSSL::SSL::VERIFY_NONE
+  OpenSSL::SSL::SSLContext::DEFAULT_PARAMS[:ssl_version] = "TLSv1_2"
 
   request = Net::HTTP::Post.new(uri.request_uri, header)
   request.body = body.to_json
